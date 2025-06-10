@@ -183,16 +183,32 @@ export default function ResultItem({ item }: ResultItemProps) {
         </TabsContent>
         <TabsContent value="products" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300">
           {item.product && item.product.length > 0 ? (
-            <ul className="space-y-1">
+            <div className="flex flex-wrap gap-2">
               {item.product.map((prod, index) => (
-                <li key={index} className="flex items-center gap-1">
-                  <span className="text-fofa-cyan">•</span> {prod.product}
-                  {prod.version && <span className="text-fofa-gray-400 ml-1">({prod.version})</span>}
-                </li>
+                <div 
+                  key={index} 
+                  className="group inline-flex items-center gap-2 px-3 py-2 bg-slate-800/40 rounded-full border border-slate-700/30 hover:border-fofa-cyan/40 hover:bg-slate-800/60 transition-all duration-200 cursor-pointer"
+                >
+                  <div className="w-1.5 h-1.5 bg-fofa-cyan rounded-full flex-shrink-0 group-hover:bg-fofa-cyan/80 transition-colors"></div>
+                  <span className="text-sm font-medium text-fofa-gray-100 group-hover:text-fofa-cyan transition-colors whitespace-nowrap">
+                    {prod.product}
+                  </span>
+                  {prod.version && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs border-fofa-cyan/40 text-fofa-cyan/80 bg-fofa-cyan/10 group-hover:border-fofa-cyan/60 transition-colors px-2 py-0.5 h-5"
+                    >
+                      {prod.version}
+                    </Badge>
+                  )}
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
-            <p>No product information available.</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Box className="w-8 h-8 text-fofa-gray-500 mb-2" />
+              <p className="text-fofa-gray-400">No product information available</p>
+            </div>
           )}
         </TabsContent>
       </Tabs>

@@ -15,7 +15,6 @@ import { useRouter } from "next/navigation"
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isFocused, setIsFocused] = useState(false)
-  const [cursorPosition, setCursorPosition] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -28,26 +27,17 @@ export default function HomePage() {
 
   const clearSearch = () => {
     setSearchQuery("")
-    setCursorPosition(0)
   }
 
-  const formatInputContent = (value: string, cursorPos: number, showCursor: boolean = true) => {
+  const formatInputContent = (value: string) => {
     if (!value.includes("&&")) {
-      return { content: null, cursorOffset: 0 };
+      return null;
     }
     
     const parts = value.split("&&");
-    let charCount = 0;
-    let cursorOffset = 0;
     const elements: ReactNode[] = [];
     
     parts.forEach((part, index) => {
-      const partStart = charCount;
-      const partEnd = charCount + part.length;
-      
-      // Check if cursor is in this part
-      const isCursorInPart = cursorPos >= partStart && cursorPos <= partEnd;
-      
       // Check if part contains key=value format
       const isKeyValue = part.includes("=");
       let formattedPart;
@@ -55,78 +45,16 @@ export default function HomePage() {
       if (isKeyValue) {
         const [key, ...valueParts] = part.split("=");
         const value = valueParts.join("=");
-        const keyStart = partStart;
-        const keyEnd = keyStart + key.length;
-        const eqPos = keyEnd;
-        const valueStart = eqPos + 1;
-        const valueEnd = partEnd;
-        
-        // Calculate cursor position within this key-value pair
-        let keyElement = <span className="text-fofa-cyan">{key.trim()}</span>;
-        let eqElement = <span className="text-fofa-gray-300">=</span>;
-        let valueElement = <span className="text-fofa-gray-100">{value.trim()}</span>;
-        
-        // Insert cursor if it's in this part and should show cursor
-        if (isCursorInPart && showCursor) {
-          const relativePos = cursorPos - partStart;
-          if (relativePos <= key.length) {
-            // Cursor is in key
-            const beforeCursor = key.slice(0, relativePos);
-            const afterCursor = key.slice(relativePos);
-            keyElement = (
-              <span className="text-fofa-cyan">
-                {beforeCursor.trim()}
-                <span className="animate-pulse bg-fofa-cyan w-0.5 h-5 inline-block" />
-                {afterCursor.trim()}
-              </span>
-            );
-          } else if (relativePos === key.length + 1) {
-            // Cursor is after =
-            eqElement = (
-              <span className="text-fofa-gray-300">
-                =
-                <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-5 inline-block" />
-              </span>
-            );
-          } else {
-            // Cursor is in value
-            const valueRelativePos = relativePos - key.length - 1;
-            const beforeCursor = value.slice(0, valueRelativePos);
-            const afterCursor = value.slice(valueRelativePos);
-            valueElement = (
-              <span className="text-fofa-gray-100">
-                {beforeCursor.trim()}
-                <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-5 inline-block" />
-                {afterCursor.trim()}
-              </span>
-            );
-          }
-        }
         
         formattedPart = (
           <span className="flex items-center">
-            {keyElement}
-            {eqElement}
-            {valueElement}
+            <span className="text-fofa-cyan">{key.trim()}</span>
+            <span className="text-fofa-gray-300">=</span>
+            <span className="text-fofa-gray-100">{value.trim()}</span>
           </span>
         );
       } else {
-        let partElement = <span className="text-fofa-gray-100">{part.trim()}</span>;
-        
-        if (isCursorInPart && showCursor) {
-          const relativePos = cursorPos - partStart;
-          const beforeCursor = part.slice(0, relativePos);
-          const afterCursor = part.slice(relativePos);
-          partElement = (
-            <span className="text-fofa-gray-100">
-              {beforeCursor.trim()}
-              <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-5 inline-block" />
-              {afterCursor.trim()}
-            </span>
-          );
-        }
-        
-        formattedPart = partElement;
+        formattedPart = <span className="text-fofa-gray-100">{part.trim()}</span>;
       }
       
       elements.push(
@@ -137,39 +65,17 @@ export default function HomePage() {
           )}
         </Fragment>
       );
-      
-      charCount += part.length;
-      if (index < parts.length - 1) {
-        charCount += 2; // for "&&"
-      }
     });
     
-    return {
-      content: <div className="flex flex-wrap gap-1">{elements}</div>,
-      cursorOffset: 0
-    };
+    return <div className="flex flex-wrap gap-1">{elements}</div>;
   };
 
   const formattedContent = useMemo(() => {
-    const result = formatInputContent(searchQuery, cursorPosition, isFocused);
-    return result.content;
-  }, [searchQuery, cursorPosition, isFocused]);
+    return formatInputContent(searchQuery);
+  }, [searchQuery]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCursorPosition(e.target.selectionStart || 0);
-  };
-
-  const handleInputClick = () => {
-    if (inputRef.current) {
-      setCursorPosition(inputRef.current.selectionStart || 0);
-    }
-  };
-
-  const handleInputKeyUp = () => {
-    if (inputRef.current) {
-      setCursorPosition(inputRef.current.selectionStart || 0);
-    }
   };
 
   return (
@@ -191,14 +97,12 @@ export default function HomePage() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={handleInputChange}
-                onClick={handleInputClick}
-                onKeyUp={handleInputKeyUp}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className={`w-full h-14 pl-5 ${formattedContent ? 'text-transparent caret-transparent' : 'text-fofa-gray-100'} pr-28 py-3 text-lg bg-slate-800/50 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-lg focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none`}
+                className={`w-full h-14 pl-5 ${!isFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} pr-28 py-3 text-lg bg-slate-800/50 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-lg focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none`}
               />
               
-              {formattedContent && (
+              {!isFocused && formattedContent && (
                 <div 
                   className="absolute inset-0 pl-5 pr-28 flex items-center text-lg pointer-events-none z-20 overflow-hidden"
                 >

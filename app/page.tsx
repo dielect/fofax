@@ -29,7 +29,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-fofa-dark text-fofa-gray-100 overflow-hidden">
-
       <main className="flex flex-1 flex-col items-center justify-center px-4 pt-20 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -75,13 +74,22 @@ export default function HomePage() {
             </div>
           </form>
 
-          <Link
-            href="#"
-            className="flex items-center gap-1.5 text-sm text-fofa-gray-300 hover:text-fofa-cyan transition-colors"
-          >
-            <HelpCircle className="w-4 h-4" />
-            查询语法
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="#"
+              className="flex items-center gap-1.5 text-sm text-fofa-gray-300 hover:text-fofa-cyan transition-colors"
+            >
+              <HelpCircle className="w-4 h-4" />
+              查询语法
+            </Link>
+            <span className="text-fofa-gray-500">|</span>
+            <Link
+              href="/settings"
+              className="text-sm text-fofa-gray-300 hover:text-fofa-cyan transition-colors"
+            >
+              API 设置
+            </Link>
+          </div>
         </motion.div>
       </main>
 

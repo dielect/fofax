@@ -1,10 +1,7 @@
 // API configurations and services
-export const FOFA_API_BASE_URL = 'http://fofa.xmint.cn/api/v1';
+export const DEFAULT_API_BASE_URL = 'http://fofa.xmint.cn/api/v1';
 
-// You should store this in a .env.local file and access it via process.env.FOFA_API_KEY
-// For now, we'll use a default variable that should be overridden
-export const FOFA_API_KEY = process.env.NEXT_PUBLIC_FOFA_API_KEY || 'your_api_key_here';
-
+// AccountInfo interface definition
 export interface AccountInfo {
   error: boolean;
   email: string;
@@ -44,6 +41,8 @@ export interface FofaSearchParams {
   page?: number;
   size?: number;
   full?: boolean;
+  apiUrl?: string;
+  apiKey?: string;
 }
 
 // Default fields to request from API
@@ -74,9 +73,13 @@ export const DEFAULT_SEARCH_FIELDS = [
 /**
  * Fetches the account information
  */
-export async function getAccountInfo(): Promise<AccountInfo> {
+export async function getAccountInfo(apiUrl?: string, apiKey?: string): Promise<AccountInfo> {
+  // Use provided values or get from localStorage
+  const baseUrl = apiUrl || getLocalStorageItem('fofax_api_url') || DEFAULT_API_BASE_URL;
+  const key = apiKey || getLocalStorageItem('fofax_api_key') || '';
+  
   try {
-    const response = await fetch(`${FOFA_API_BASE_URL}/info/my?key=${FOFA_API_KEY}`);
+    const response = await fetch(`${baseUrl}/info/my?key=${key}`);
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
@@ -116,6 +119,18 @@ export function toBase64(str: string): string {
   return btoa(unescape(encodeURIComponent(str))); // Browser
 }
 
+// Helper function to safely get localStorage values
+function getLocalStorageItem(key: string): string | null {
+  if (typeof window !== 'undefined') {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.error(`Error reading ${key} from localStorage:`, error);
+      return null;
+    }
+  }
+  return null;
+}
 
 /**
  * Executes a search query against the FOFA API
@@ -127,9 +142,13 @@ export async function searchFofa(params: FofaSearchParams): Promise<FofaSearchRe
     // Base64 encode the query as required by the API
     const qbase64 = toBase64(params.query);
     
+    // Get API URL and key from params or localStorage
+    const baseUrl = params.apiUrl || getLocalStorageItem('fofax_api_url') || DEFAULT_API_BASE_URL;
+    const apiKey = params.apiKey || getLocalStorageItem('fofax_api_key') || '';
+    
     // Build the URL with query parameters
-    const url = new URL(`${FOFA_API_BASE_URL}/search/all`);
-    url.searchParams.append('key', FOFA_API_KEY);
+    const url = new URL(`${baseUrl}/search/all`);
+    url.searchParams.append('key', apiKey);
     url.searchParams.append('qbase64', qbase64);
     
     // Add optional parameters if provided

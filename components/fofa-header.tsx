@@ -6,12 +6,14 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { SearchIcon, X } from "lucide-react"
+import { SearchIcon, X, Settings } from "lucide-react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAccountInfo, type AccountInfo } from "@/lib/api"
 import { useSearch } from "@/lib/context/search-context"
+import { useApiSettings } from "@/lib/context/api-settings-context"
+import FofaLogo from "@/components/fofa-logo"
 
 interface FofaHeaderProps {
   initialSearchQuery?: string
@@ -25,6 +27,9 @@ export default function FofaHeader({
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   
+  // Use settings context
+  const { apiUrl, apiKey, isLoaded } = useApiSettings()
+  
   // Use search context
   const { query, setQuery, performSearch } = useSearch()
   
@@ -37,9 +42,11 @@ export default function FofaHeader({
 
   useEffect(() => {
     const fetchAccountInfo = async () => {
+      if (!isLoaded) return; // Wait until API settings are loaded
+      
       setIsLoading(true)
       try {
-        const data = await getAccountInfo()
+        const data = await getAccountInfo(apiUrl, apiKey)
         setAccountInfo(data)
       } catch (error) {
         console.error("Failed to fetch account info:", error)
@@ -48,8 +55,10 @@ export default function FofaHeader({
       }
     }
 
-    fetchAccountInfo()
-  }, [])
+    if (isLoaded) {
+      fetchAccountInfo()
+    }
+  }, [apiUrl, apiKey, isLoaded])
 
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -79,15 +88,9 @@ export default function FofaHeader({
         <div className="flex items-center w-full">
           <Link 
             href="/" 
-            className="flex items-center gap-1.5 text-xl font-bold text-fofa-cyan transition-transform duration-300 hover:scale-105 mr-4"
+            className="flex items-center text-xl font-bold text-fofa-cyan transition-transform duration-300 hover:scale-105 mr-4"
           >
-            <motion.div
-              whileHover={{ rotate: -10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 10 }}
-            >
-              <SearchIcon className="w-6 h-6 text-fofa-cyan transform -scale-x-100" />
-            </motion.div>
-            <span>FOFA</span>
+            <FofaLogo variant="header" />
           </Link>
           
           <form onSubmit={handleSearch} className="relative w-1/2">
@@ -143,7 +146,7 @@ export default function FofaHeader({
           </form>
           
           <div className="ml-auto flex items-center gap-2">
-            {isLoading ? (
+            {isLoading || !isLoaded ? (
               <div className="text-fofa-gray-200 text-sm font-medium">
                 <Badge variant="outline" className="border-fofa-cyan/40 bg-fofa-dark/80 px-3 py-1 text-fofa-cyan">
                   Loading...
@@ -175,6 +178,7 @@ export default function FofaHeader({
                     有效期至：{accountInfo?.expiration || 'N/A'}
                   </Badge>
                 </div>
+
               </>
             )}
           </div>

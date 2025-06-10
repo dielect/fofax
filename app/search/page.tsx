@@ -37,10 +37,12 @@ function SearchResultsContent() {
   // Keep track of the previous searchParams instance for comparison
   const searchParamsString = searchParams.toString();
   const prevSearchParamsRef = useRef(searchParamsString);
+  const initialRenderRef = useRef(true);
 
   useEffect(() => {
-    // Only perform search if the URL params have actually changed
-    if (searchParamsString !== prevSearchParamsRef.current) {
+    // Always perform search on initial render or when URL params change
+    if (initialRenderRef.current || searchParamsString !== prevSearchParamsRef.current) {
+      initialRenderRef.current = false;
       prevSearchParamsRef.current = searchParamsString;
       
       if (query) {

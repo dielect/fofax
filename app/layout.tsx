@@ -5,6 +5,7 @@ import "./globals.css"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SearchProvider } from "@/lib/context/search-context"
+import { ApiSettingsProvider } from "@/lib/context/api-settings-context"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -26,9 +27,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <SearchProvider>
-            {children}
-          </SearchProvider>
+          <ApiSettingsProvider>
+            <SearchProvider>
+              {children}
+            </SearchProvider>
+          </ApiSettingsProvider>
         </ThemeProvider>
       </body>
     </html>

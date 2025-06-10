@@ -1,5 +1,5 @@
 // API configurations and services
-export const DEFAULT_API_BASE_URL = 'http://fofa.xmint.cn/api/v1';
+export const DEFAULT_API_BASE_URL = 'https://fofa.xmint.cn/api/v1';
 
 // AccountInfo interface definition
 export interface AccountInfo {
@@ -46,8 +46,8 @@ export interface FofaSearchParams {
 }
 
 // Default fields to request from API
-export const DEFAULT_SEARCH_FIELDS = [
-  "host",
+export const DEFAULT_SEARCH_FIELDS =
+[
   "ip",
   "port",
   "protocol",
@@ -55,20 +55,42 @@ export const DEFAULT_SEARCH_FIELDS = [
   "country_name",
   "region",
   "city",
-  "title",
-  "domain",
-  "server",
+  "longitude",
+  "latitude",
   "asn",
   "org",
+  "host",
+  "domain",
   "os",
+  "server",
+  "icp",
+  "title",
   "jarm",
   "header",
-  "cert",
   "banner",
-  "updated_at",
+  "cert",
+  "base_protocol",
+  "link",
+  "cert.issuer.org",
+  "cert.issuer.cn",
+  "cert.subject.org",
+  "cert.subject.cn",
+  "tls.ja3s",
+  "tls.version",
+  "cert.sn",
+  "cert.not_before",
+  "cert.not_after",
+  "cert.domain",
+  "header_hash",
+  "banner_hash",
+  "banner_fid",
   "product",
+  "product_category",
   "version",
-].join(",");
+  "lastupdatetime",
+  "cname"
+]
+.join(",");
 
 /**
  * Fetches the account information

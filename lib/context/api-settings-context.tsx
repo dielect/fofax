@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react"
 
 // Default values for API settings
-const DEFAULT_API_URL = "http://fofa.xmint.cn/api/v1"
+const DEFAULT_API_URL = "https://fofa.xmint.cn/api/v1"
 const DEFAULT_API_KEY = ""
 
 interface ApiSettingsContextType {

@@ -1,6 +1,7 @@
 "use client"
 
-import type React from "react"
+import { type ReactNode, type FormEvent, type ChangeEvent } from "react"
+import { Fragment } from "react"
 
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchIcon, X, Settings, Menu } from "lucide-react"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { getAccountInfo, type AccountInfo } from "@/lib/api"
 import { useSearch } from "@/lib/context/search-context"
@@ -26,6 +27,14 @@ export default function FofaHeader({
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [localQuery, setLocalQuery] = useState("")
+  const [formattedContent, setFormattedContent] = useState<ReactNode>(null)
+  const [cursorPosition, setCursorPosition] = useState(0)
+  const [mobileFormattedContent, setMobileFormattedContent] = useState<ReactNode>(null)
+  const [mobileCursorPosition, setMobileCursorPosition] = useState(0)
+  const [mobileFocused, setMobileFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const mobileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   
   // Use settings context
@@ -36,10 +45,12 @@ export default function FofaHeader({
   
   // Initialize search query from props or context
   useEffect(() => {
-    if (initialSearchQuery && initialSearchQuery !== query) {
-      setQuery(initialSearchQuery)
+    if (initialSearchQuery && initialSearchQuery !== localQuery) {
+      setLocalQuery(initialSearchQuery)
+    } else if (query && query !== localQuery) {
+      setLocalQuery(query)
     }
-  }, [initialSearchQuery, query, setQuery])
+  }, [initialSearchQuery, query])
 
   useEffect(() => {
     const fetchAccountInfo = async () => {
@@ -73,21 +84,187 @@ export default function FofaHeader({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+  const formatInputContent = (value: string, cursorPos: number) => {
+    if (!value.includes("&&")) {
+      return { content: null, cursorOffset: 0 };
+    }
+    
+    const parts = value.split("&&");
+    let charCount = 0;
+    let cursorOffset = 0;
+    const elements: ReactNode[] = [];
+    
+    parts.forEach((part, index) => {
+      const partStart = charCount;
+      const partEnd = charCount + part.length;
+      
+      // Check if cursor is in this part
+      const isCursorInPart = cursorPos >= partStart && cursorPos <= partEnd;
+      
+      // Check if part contains key=value format
+      const isKeyValue = part.includes("=");
+      let formattedPart;
+      
+      if (isKeyValue) {
+        const [key, ...valueParts] = part.split("=");
+        const value = valueParts.join("=");
+        const keyStart = partStart;
+        const keyEnd = keyStart + key.length;
+        const eqPos = keyEnd;
+        const valueStart = eqPos + 1;
+        const valueEnd = partEnd;
+        
+        // Calculate cursor position within this key-value pair
+        let keyElement = <span className="text-fofa-cyan">{key.trim()}</span>;
+        let eqElement = <span className="text-fofa-gray-300">=</span>;
+        let valueElement = <span className="text-fofa-gray-100">{value.trim()}</span>;
+        
+        // Insert cursor if it's in this part
+        if (isCursorInPart) {
+          const relativePos = cursorPos - partStart;
+          if (relativePos <= key.length) {
+            // Cursor is in key
+            const beforeCursor = key.slice(0, relativePos);
+            const afterCursor = key.slice(relativePos);
+            keyElement = (
+              <span className="text-fofa-cyan">
+                {beforeCursor.trim()}
+                <span className="animate-pulse bg-fofa-cyan w-0.5 h-4 inline-block" />
+                {afterCursor.trim()}
+              </span>
+            );
+          } else if (relativePos === key.length + 1) {
+            // Cursor is after =
+            eqElement = (
+              <span className="text-fofa-gray-300">
+                =
+                <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-4 inline-block" />
+              </span>
+            );
+          } else {
+            // Cursor is in value
+            const valueRelativePos = relativePos - key.length - 1;
+            const beforeCursor = value.slice(0, valueRelativePos);
+            const afterCursor = value.slice(valueRelativePos);
+            valueElement = (
+              <span className="text-fofa-gray-100">
+                {beforeCursor.trim()}
+                <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-4 inline-block" />
+                {afterCursor.trim()}
+              </span>
+            );
+          }
+        }
+        
+        formattedPart = (
+          <span className="flex items-center">
+            {keyElement}
+            {eqElement}
+            {valueElement}
+          </span>
+        );
+      } else {
+        let partElement = <span className="text-fofa-gray-100">{part.trim()}</span>;
+        
+        if (isCursorInPart) {
+          const relativePos = cursorPos - partStart;
+          const beforeCursor = part.slice(0, relativePos);
+          const afterCursor = part.slice(relativePos);
+          partElement = (
+            <span className="text-fofa-gray-100">
+              {beforeCursor.trim()}
+              <span className="animate-pulse bg-fofa-gray-100 w-0.5 h-4 inline-block" />
+              {afterCursor.trim()}
+            </span>
+          );
+        }
+        
+        formattedPart = partElement;
+      }
+      
+      elements.push(
+        <Fragment key={index}>
+          {formattedPart}
+          {index < parts.length - 1 && (
+            <span className="text-fofa-gray-400 font-bold">&&</span>
+          )}
+        </Fragment>
+      );
+      
+      charCount += part.length;
+      if (index < parts.length - 1) {
+        charCount += 2; // for "&&"
+      }
+    });
+    
+    return {
+      content: <div className="flex flex-wrap gap-1">{elements}</div>,
+      cursorOffset: 0
+    };
+  };
+
+  useEffect(() => {
+    const result = formatInputContent(localQuery, cursorPosition);
+    setFormattedContent(result.content);
+  }, [localQuery, cursorPosition]);
+
+  useEffect(() => {
+    const result = formatInputContent(localQuery, mobileCursorPosition);
+    setMobileFormattedContent(result.content);
+  }, [localQuery, mobileCursorPosition]);
+
+  const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (query.trim()) {
+    if (localQuery.trim()) {
       // Perform the search through context
-      await performSearch(query)
+      await performSearch(localQuery)
       // Navigate to search results page with the query parameter
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+      router.push(`/search?q=${encodeURIComponent(localQuery.trim())}`)
       // Close mobile menu if open
       setShowMobileMenu(false)
     }
   }
 
   const clearSearch = () => {
-    setQuery("")
+    setLocalQuery("")
+    setQuery("") // Also clear the context query
+    setCursorPosition(0)
+    setMobileCursorPosition(0)
   }
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLocalQuery(e.target.value);
+    setCursorPosition(e.target.selectionStart || 0);
+  };
+
+  const handleMobileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLocalQuery(e.target.value);
+    setMobileCursorPosition(e.target.selectionStart || 0);
+  };
+
+  const handleInputClick = () => {
+    if (inputRef.current) {
+      setCursorPosition(inputRef.current.selectionStart || 0);
+    }
+  };
+
+  const handleMobileInputClick = () => {
+    if (mobileInputRef.current) {
+      setMobileCursorPosition(mobileInputRef.current.selectionStart || 0);
+    }
+  };
+
+  const handleInputKeyUp = () => {
+    if (inputRef.current) {
+      setCursorPosition(inputRef.current.selectionStart || 0);
+    }
+  };
+
+  const handleMobileInputKeyUp = () => {
+    if (mobileInputRef.current) {
+      setMobileCursorPosition(mobileInputRef.current.selectionStart || 0);
+    }
+  };
 
   // Format the key status based on the isvip field
   const keyStatus = accountInfo?.isvip ? "有效" : "无效"
@@ -128,18 +305,29 @@ export default function FofaHeader({
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <Input
+                  ref={inputRef}
                   type="search"
                   placeholder="Search..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  value={localQuery}
+                  onChange={handleInputChange}
+                  onClick={handleInputClick}
+                  onKeyUp={handleInputKeyUp}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="w-full h-11 pl-4 pr-14 bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 text-fofa-gray-100 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300"
+                  className={`w-full h-11 pl-4 pr-14 ${formattedContent ? 'text-transparent caret-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
                 />
+                
+                {formattedContent && (
+                  <div 
+                    className="absolute inset-0 pl-4 pr-14 flex items-center text-sm pointer-events-none z-20 overflow-hidden"
+                  >
+                    {formattedContent}
+                  </div>
+                )}
               </motion.div>
               
               <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 z-20">
-                {query && (
+                {localQuery && (
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -205,23 +393,34 @@ export default function FofaHeader({
             <form onSubmit={handleSearch} className="relative w-full mb-4">
               <div className="relative gradient-container">
                 <motion.div
-                  className={isFocused ? "gradient-border" : ""}
+                  className={mobileFocused ? "gradient-border" : ""}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <Input
+                    ref={mobileInputRef}
                     type="search"
                     placeholder="Search..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    className="w-full h-11 pl-4 pr-14 bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 text-fofa-gray-100 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300"
+                    value={localQuery}
+                    onChange={handleMobileInputChange}
+                    onClick={handleMobileInputClick}
+                    onKeyUp={handleMobileInputKeyUp}
+                    onFocus={() => setMobileFocused(true)}
+                    onBlur={() => setMobileFocused(false)}
+                    className={`w-full h-11 pl-4 pr-14 ${mobileFormattedContent ? 'text-transparent caret-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
                   />
+                  
+                  {mobileFormattedContent && (
+                    <div 
+                      className="absolute inset-0 pl-4 pr-14 flex items-center text-sm pointer-events-none z-20 overflow-hidden"
+                    >
+                      {mobileFormattedContent}
+                    </div>
+                  )}
                 </motion.div>
                 
                 <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 z-20">
-                  {query && (
+                  {localQuery && (
                     <motion.button
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}

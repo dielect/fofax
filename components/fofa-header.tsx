@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { SearchIcon, X, Settings } from "lucide-react"
+import { SearchIcon, X, Settings, Menu } from "lucide-react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -25,6 +25,7 @@ export default function FofaHeader({
   const [isFocused, setIsFocused] = useState(false)
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const router = useRouter()
   
   // Use settings context
@@ -60,6 +61,18 @@ export default function FofaHeader({
     }
   }, [apiUrl, apiKey, isLoaded])
 
+  // Close mobile menu on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowMobileMenu(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (query.trim()) {
@@ -67,6 +80,8 @@ export default function FofaHeader({
       await performSearch(query)
       // Navigate to search results page with the query parameter
       router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+      // Close mobile menu if open
+      setShowMobileMenu(false)
     }
   }
 
@@ -83,17 +98,29 @@ export default function FofaHeader({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 bg-fofa-dark/90 backdrop-blur-md text-fofa-gray-100 shadow-md"
+        className="fixed top-0 left-0 right-0 z-50 bg-fofa-dark/90 backdrop-blur-md text-fofa-gray-100 shadow-md"
       >
-        <div className="flex items-center w-full">
-          <Link 
-            href="/" 
-            className="flex items-center text-xl font-bold text-fofa-cyan transition-transform duration-300 hover:scale-105 mr-4"
-          >
-            <FofaLogo variant="header" />
-          </Link>
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="md:hidden text-fofa-cyan"
+            >
+              <Menu size={24} />
+            </Button>
+            
+            <Link 
+              href="/" 
+              className="flex items-center text-xl font-bold text-fofa-cyan transition-transform duration-300 hover:scale-105"
+            >
+              <FofaLogo variant="header" />
+            </Link>
+          </div>
           
-          <form onSubmit={handleSearch} className="relative w-1/2">
+          {/* Desktop search */}
+          <form onSubmit={handleSearch} className="hidden md:block relative w-1/2">
             <div className="relative gradient-container">
               <motion.div
                 className={isFocused ? "gradient-border" : ""}
@@ -145,7 +172,8 @@ export default function FofaHeader({
             </div>
           </form>
           
-          <div className="ml-auto flex items-center gap-2">
+          {/* Desktop user info */}
+          <div className="hidden md:flex items-center gap-2">
             {isLoading || !isLoaded ? (
               <div className="text-fofa-gray-200 text-sm font-medium">
                 <Badge variant="outline" className="border-fofa-cyan/40 bg-fofa-dark/80 px-3 py-1 text-fofa-cyan">
@@ -154,19 +182,7 @@ export default function FofaHeader({
               </div>
             ) : (
               <>
-                {accountInfo?.isvip && (
-                  <>
-                    <div className="text-fofa-gray-200 text-sm font-medium">
-                      <Badge variant="outline" className="border-fofa-cyan/40 bg-fofa-dark/80 px-3 py-1 text-fofa-cyan flex items-center gap-1">
-                        <svg className="w-4 h-4 text-fofa-cyan" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5c-1.51 0-2.816.917-3.437 2.25-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z" />
-                        </svg>
-                        认证用户
-                      </Badge>
-                    </div>
-                    <div className="text-fofa-gray-200 text-sm">|</div>
-                  </>
-                )}
+
                 <div className="text-fofa-gray-200 text-sm font-medium">
                   <Badge variant="outline" className="border-fofa-cyan/40 bg-fofa-dark/80 px-3 py-1 text-fofa-cyan">
                     剩余可使用量：{accountInfo?.remain_api_query || 0}
@@ -178,11 +194,85 @@ export default function FofaHeader({
                     有效期至：{accountInfo?.expiration || 'N/A'}
                   </Badge>
                 </div>
-
               </>
             )}
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        {showMobileMenu && (
+          <div className="md:hidden px-4 py-3 border-t border-slate-700/50 bg-fofa-dark/90">
+            <form onSubmit={handleSearch} className="relative w-full mb-4">
+              <div className="relative gradient-container">
+                <motion.div
+                  className={isFocused ? "gradient-border" : ""}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    className="w-full h-11 pl-4 pr-14 bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 text-fofa-gray-100 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300"
+                  />
+                </motion.div>
+                
+                <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 z-20">
+                  {query && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      type="button"
+                      onClick={clearSearch}
+                      className="mr-1 group"
+                    >
+                      <span className="relative flex items-center justify-center w-7 h-7 rounded-full bg-fofa-gray-600/30 group-hover:bg-fofa-gray-600/50 transition-all duration-200">
+                        <X className="w-4 h-4 text-fofa-gray-300 group-hover:text-fofa-gray-100 transition-colors" />
+                      </span>
+                    </motion.button>
+                  )}
+                  
+                  <motion.div 
+                    whileHover={{ scale: 1.1 }} 
+                    whileTap={{ scale: 0.95 }}
+                    className="ml-1"
+                  >
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      size="icon"
+                      className="text-fofa-cyan p-1.5 h-9 w-9 transition-colors duration-300 hover:bg-transparent"
+                    >
+                      <SearchIcon className="w-5 h-5" />
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </form>
+            
+            {/* Mobile account info - Redesigned */}
+            {!isLoading && isLoaded && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-fofa-gray-200 text-sm font-medium">
+                  <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                    <p className="text-xs text-fofa-gray-400 mb-1">剩余可使用量</p>
+                    <p className="text-lg text-fofa-cyan font-medium">{accountInfo?.remain_api_query || 0}</p>
+                  </div>
+                </div>
+                <div className="text-fofa-gray-200 text-sm font-medium">
+                  <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                    <p className="text-xs text-fofa-gray-400 mb-1">有效期至</p>
+                    <p className="text-lg text-fofa-cyan font-medium">{accountInfo?.expiration || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </motion.header>
 
       <style jsx global>{`

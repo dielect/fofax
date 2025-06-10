@@ -13,9 +13,29 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: "FOFA Clone",
-  description: "A clone of the FOFA homepage",
-    generator: 'v0.dev'
+  title: "FoFaX - Security Search Engine",
+  description: "Advanced security search platform for network assets and vulnerabilities",
+  keywords: "security, search engine, network assets, vulnerabilities, cybersecurity",
+  authors: [{ name: "FoFaX Team" }],
+  creator: "FoFaX",
+  publisher: "FoFaX",
+  openGraph: {
+    title: "FoFaX - Security Search Engine",
+    description: "Advanced security search platform for network assets and vulnerabilities",
+    type: "website",
+    locale: "en_US",
+    siteName: "FoFaX",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FoFaX - Security Search Engine",
+    description: "Advanced security search platform for network assets and vulnerabilities",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  generator: "FoFaX"
 }
 
 export default function RootLayout({

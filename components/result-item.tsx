@@ -4,29 +4,45 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Link2, Code, Box, RefreshCw, PlusCircle } from "lucide-react"
+import { Link2, Code, Box, RefreshCw, PlusCircle, Globe, Server } from "lucide-react"
 import { motion } from "framer-motion"
+import flags from 'emoji-flags'
 
 export interface ResultItemData {
-  id: string
-  url: string
+  host?: string
   ip: string
   port: number
-  title: string
-  location: {
-    country: string
-    region: string
-    city: string
-    flag: string
+  protocol?: string
+  location?: {
+    country?: string
+    country_name?: string
+    region?: string
+    city?: string
   }
-  asn: string
-  organization: string
-  date: string
-  tech: string[]
-  httpHeaders: string
-  products?: string[] // Optional
-  certificateInfo?: string // Optional
-  tags: string[]
+  title?: string
+  domain?: string
+  server?: string
+  icp?: string
+  asn?: number | string
+  org?: string
+  os?: string[]
+  jarm?: string
+  header?: string
+  cert?: {
+    cert: string
+  }
+  banner?: string
+  updated_at?: string
+  product?: Array<{
+    product: string
+    version?: string
+  }>
+  version?: string
+  icon_hash?: string
+  fid?: string
+  structinfo?: string
+  // Custom field for the UI
+  id?: string
 }
 
 interface ResultItemProps {
@@ -34,6 +50,13 @@ interface ResultItemProps {
 }
 
 export default function ResultItem({ item }: ResultItemProps) {
+  // Create a URL from host or IP+port
+  const url = item.host || `${item.protocol || 'http'}://${item.ip}:${item.port}`;
+  const locationAvailable = item.location && (item.location.country_name || item.location.country || item.location.region || item.location.city);
+  
+  // Generate a unique ID if not provided
+  const id = item.id || `${item.ip}-${item.port}`;
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -41,71 +64,107 @@ export default function ResultItem({ item }: ResultItemProps) {
       transition={{ duration: 0.3 }}
       className="bg-slate-800/30 rounded-lg shadow-lg overflow-hidden border border-slate-700/50"
     >
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-2">
-            <Link2 size={18} className="text-fofa-cyan" />
+      <div className="p-5 space-y-3">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-2 max-w-[85%]">
+            <Link2 size={18} className="text-fofa-cyan flex-shrink-0" />
             <a
-              href={item.url}
+              href={url}
               target="_blank"
               rel="noopener noreferrer"
               className="text-lg font-semibold text-fofa-cyan hover:underline truncate"
             >
-              {item.url}
+              {url}
             </a>
-            <Badge variant="outline" className="text-xs border-blue-500 text-blue-400 ml-1">
-              MCO... {/* Placeholder */}
-            </Badge>
+            {item.domain && (
+              <Badge variant="outline" className="text-xs border-blue-500 text-blue-400 flex-shrink-0">
+                {item.domain.length > 8 ? `${item.domain.substring(0, 8)}...` : item.domain}
+              </Badge>
+            )}
           </div>
-          <Badge className="bg-blue-600 text-white text-xs">{item.port}</Badge>
+          <Badge className="bg-blue-600 text-white text-xs flex-shrink-0">{item.port}</Badge>
         </div>
 
-        <h3 className="text-md text-fofa-gray-100 mb-1 truncate">{item.title}</h3>
-        <p className="text-xs text-fofa-gray-400 mb-1">{item.ip}</p>
-        <div className="flex items-center gap-2 text-xs text-fofa-gray-300 mb-2">
-          <Image src={item.location.flag || "/placeholder.svg"} alt={item.location.country} width={16} height={12} />
-          <span>
-            {item.location.country} / {item.location.region} / {item.location.city}
-          </span>
-        </div>
-
-        <div className="text-xs text-fofa-gray-400 space-y-0.5 mb-2">
-          <p>
-            ASN: <span className="text-fofa-gray-200">{item.asn}</span>
-          </p>
-          <p>
-            组织: <span className="text-fofa-gray-200 truncate">{item.organization}</span>
-          </p>
-          <p>
-            日期: <span className="text-fofa-gray-200">{item.date}</span>
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          {item.tech.map((techName) => (
-            <Badge
-              key={techName}
-              variant="secondary"
-              className="bg-green-500/20 text-green-400 border-green-500/30 text-xs"
-            >
-              {techName === "nginx" && (
-                <Image src="/tech-icons/nginx.png" alt="nginx" width={12} height={12} className="mr-1 inline" />
+        <h3 className="text-md text-fofa-gray-100 truncate">{item.title || 'No title'}</h3>
+        
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-fofa-gray-400">
+          <p>{item.ip}</p>
+          
+          {locationAvailable && (
+            <div className="flex items-center gap-2 text-fofa-gray-300">
+              {item.location?.country && (
+                <span className="text-base">
+                  {flags[item.location.country]?.emoji || item.location.country}
+                </span>
               )}
-              {techName}
-            </Badge>
-          ))}
+              <span>
+                {[
+                  item.location?.country_name || item.location?.country, 
+                  item.location?.region, 
+                  item.location?.city
+                ]
+                  .filter(Boolean)
+                  .join(' / ')}
+              </span>
+            </div>
+          )}
+
+          {item.asn && (
+            <div className="flex items-center gap-1">
+              <span className="text-fofa-gray-400">ASN:</span>
+              <span className="text-fofa-gray-200">{item.asn}</span>
+            </div>
+          )}
+          
+          {item.org && (
+            <div className="flex items-center gap-1 max-w-[300px] min-w-[80px]">
+              <span className="text-fofa-gray-400 whitespace-nowrap">组织：</span>
+              <span className="text-fofa-gray-200 truncate">{item.org}</span>
+            </div>
+          )}
+          
+          {item.updated_at && (
+            <div className="flex items-center gap-1">
+              <span className="text-fofa-gray-400">日期：</span>
+              <span className="text-fofa-gray-200">{item.updated_at}</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2 text-fofa-gray-400">
-          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-fofa-cyan">
-            <Code size={16} />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-fofa-cyan">
-            <Box size={16} />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-fofa-cyan">
-            <RefreshCw size={16} />
-          </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {item.server && (
+            <Badge
+              variant="secondary"
+              className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-3 py-1 tracking-wide"
+            >
+              <Server size={12} className="mr-1.5" />
+              <span className="tracking-widest">{item.server}</span>
+            </Badge>
+          )}
+          {item.os && item.os.length > 0 && (
+            <Badge
+              variant="secondary"
+              className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs px-3 py-1 tracking-wide"
+            >
+              <span className="tracking-widest">{item.os.join(", ")}</span>
+            </Badge>
+          )}
+          {item.protocol && (
+            <Badge
+              variant="secondary"
+              className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs px-3 py-1 tracking-wide"
+            >
+              <span className="tracking-widest">{item.protocol}</span>
+            </Badge>
+          )}
+          {item.version && (
+            <Badge
+              variant="secondary"
+              className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs px-3 py-1 tracking-wide"
+            >
+              <span className="tracking-widest">{item.version}</span>
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -119,32 +178,41 @@ export default function ResultItem({ item }: ResultItemProps) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="header" className="p-4 bg-slate-900/30 text-xs text-fofa-gray-300 leading-relaxed">
-          <pre className="whitespace-pre-wrap break-all">{item.httpHeaders}</pre>
-          {item.certificateInfo && (
-            <Button variant="link" className="text-fofa-cyan p-0 h-auto mt-2 text-xs hover:underline">
-              <PlusCircle size={14} className="mr-1" /> Certificate
-            </Button>
-          )}
+          <pre className="whitespace-pre-wrap break-all">{item.header || 'No header information available'}</pre>
         </TabsContent>
         <TabsContent value="products" className="p-4 bg-slate-900/30 text-xs text-fofa-gray-300">
-          {item.products && item.products.length > 0 ? (
-            <ul>
-              {item.products.map((p) => (
-                <li key={p}>{p}</li>
+          {item.product && item.product.length > 0 ? (
+            <ul className="space-y-1">
+              {item.product.map((prod, index) => (
+                <li key={index} className="flex items-center gap-1">
+                  <span className="text-fofa-cyan">•</span> {prod.product}
+                  {prod.version && <span className="text-fofa-gray-400 ml-1">({prod.version})</span>}
+                </li>
               ))}
             </ul>
           ) : (
-            <p>No products listed.</p>
+            <p>No product information available.</p>
           )}
         </TabsContent>
       </Tabs>
 
       <div className="p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap gap-2">
-        {item.tags.map((tag) => (
-          <Badge key={tag} variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
-            {tag}
+        {/* Display any additional tags */}
+        {item.jarm && (
+          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
+            JARM: {item.jarm.substring(0, 8)}...
           </Badge>
-        ))}
+        )}
+        {item.icon_hash && (
+          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
+            Icon: {item.icon_hash.substring(0, 8)}...
+          </Badge>
+        )}
+        {item.fid && (
+          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
+            FID: {item.fid.substring(0, 8)}...
+          </Badge>
+        )}
       </div>
     </motion.div>
   )

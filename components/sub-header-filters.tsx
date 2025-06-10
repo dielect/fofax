@@ -23,14 +23,16 @@ export default function SubHeaderFilters() {
       className="px-4 py-2 bg-fofa-dark border-b border-slate-700/50 flex items-center gap-4 text-sm text-fofa-gray-300"
     >
       <span>相关icon(10):</span>
-      <div className="flex items-center gap-2 overflow-x-auto">
+      <div className="flex py-2 px-2 items-center gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
         {relatedIconsData.map((icon, index) => (
-          <div key={index} className="relative shrink-0">
-            <Avatar className="h-7 w-7 rounded-sm border border-slate-600">
+          <div key={index} className="relative shrink-0 group cursor-pointer hover:opacity-90 transition-opacity">
+            <Avatar className="h-7 w-7 rounded-sm border border-slate-600 shadow-sm">
               <AvatarImage src={icon.src || "/placeholder.svg"} alt={icon.alt} />
               <AvatarFallback className="bg-slate-700 text-xs">{icon.alt.substring(0, 1)}</AvatarFallback>
             </Avatar>
-            <Badge className="absolute -top-1.5 -right-2.5 text-xs px-1 py-0.5 bg-fofa-cyan text-fofa-dark rounded-sm">
+            <Badge 
+              className="absolute -top-1 -right-1.5 text-[0.6rem] px-0.5 min-w-3 h-3 flex items-center justify-center bg-fofa-cyan text-fofa-dark rounded-sm font-medium"
+            >
               {icon.count}
             </Badge>
           </div>

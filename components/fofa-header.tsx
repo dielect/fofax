@@ -256,11 +256,9 @@ export default function FofaHeader({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleUserClick}
-              className="p-2 rounded-full hover:bg-slate-800/60 transition-all duration-200"
+              className="group p-2 transition-all duration-300"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-fofa-cyan to-blue-500 flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
+              <User className="w-6 h-6 text-slate-400 group-hover:text-fofa-cyan transition-colors duration-300" />
             </motion.button>
             
             {/* User dropdown */}
@@ -282,14 +280,12 @@ export default function FofaHeader({
                     ) : (
                       <div className="space-y-4">
                         <div className="flex items-center gap-3 pb-3 border-b border-slate-700/50">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-fofa-cyan to-blue-500 flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
-                          </div>
+                          <User className="w-8 h-8 text-slate-300" />
                           <div>
                             <div className="flex items-center gap-1">
                               <p className="text-fofa-gray-100 font-medium">{accountInfo?.username || '用户'}</p>
                               {accountInfo?.isvip && (
-                                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="w-4 h-4 bg-gradient-to-br from-fofa-cyan/80 to-blue-500/80 rounded-full flex items-center justify-center">
                                   <Check className="w-2.5 h-2.5 text-white" />
                                 </div>
                               )}
@@ -385,11 +381,9 @@ export default function FofaHeader({
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleUserClick}
-              className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800/70 transition-all duration-200"
+              className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800/40 hover:bg-slate-800/60 transition-all duration-300 border border-slate-700/20 hover:border-slate-600/30"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-fofa-cyan to-blue-500 flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
+              <User className="w-7 h-7 text-slate-300" />
               <div className="flex-1 text-left">
                 <p className="text-fofa-gray-100 font-medium">账户信息</p>
                 <p className="text-xs text-fofa-gray-400">点击查看详情</p>
@@ -418,7 +412,7 @@ export default function FofaHeader({
                           <div className="flex items-center justify-center gap-1">
                             <p className="text-fofa-gray-100 font-medium">{accountInfo?.username || '用户'}</p>
                             {accountInfo?.isvip && (
-                              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                              <div className="w-4 h-4 bg-gradient-to-br from-fofa-cyan/80 to-blue-500/80 rounded-full flex items-center justify-center">
                                 <Check className="w-2.5 h-2.5 text-white" />
                               </div>
                             )}

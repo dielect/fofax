@@ -1,30 +1,59 @@
-# Fofa homepage clone
+# Fofax - 一款更美观、更注重隐私的 FOFA 第三方客户端
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+[![部署状态](https://img.shields.io/badge/Deployment-Ready-brightgreen?style=for-the-badge)]()
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/dielects-projects/v0-fofa-homepage-clone)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/QugQlps4JL3)
+**Fofax** 是为 [FOFA](https://fofa.info) 用户打造的一款非官方、开源的第三方桌面客户端。如果你热爱 FOFA 强大的数据能力，但又希望获得一个更现代化、更简洁美观的操作界面，同时对个人隐私有更高的要求，那么 Fofax 将是你的理想之选。
 
-## Overview
+本项目旨在提供一个**替代性**的前端体验，它完全依赖于 FOFA 官方提供的兼容 API，所有数据均来自 FOFA。
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+---
 
-## Deployment
+## ✨ 核心优势
 
-Your project is live at:
+### 🔒 安全与隐私优先
 
-**[https://vercel.com/dielects-projects/v0-fofa-homepage-clone](https://vercel.com/dielects-projects/v0-fofa-homepage-clone)**
+我们深知在网络安全领域，数据安全和用户隐私至关重要。Fofax 从设计之初就将安全作为核心原则：
 
-## Build your app
+- **非开源设计**: Fofax 采用闭源模式，最大限度地减少潜在的攻击面，保护核心代码和算法不被恶意利用。
+- **本地化存储**: 您的所有搜索历史、项目数据和个人配置都默认存储在本地设备上，我们不会将您的任何敏感信息上传到云端。
+- **无追踪策略**: 我们承诺不追踪您的任何使用行为，不分析您的搜索习惯，确保您的操作完全匿名。
 
-Continue building your app on:
+### 🎨 精美流畅的界面
 
-**[https://v0.dev/chat/projects/QugQlps4JL3](https://v0.dev/chat/projects/QugQlps4JL3)**
+告别陈旧复杂的工具界面。Fofax 拥有经过精心设计的现代化用户界面，为您带来前所未有的流畅体验：
 
-## How It Works
+- **现代化设计**: 简洁、直观的界面布局，让您能更专注于信息本身。
+- **响应式体验**: 无论您使用桌面电脑还是平板设备，都能获得一致且舒适的操作体验。
+- **数据可视化**: 提供丰富的图表和数据可视化选项，帮助您更直观地理解和分析复杂的网络资产数据。
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+### 🔌 灵活的第三方 API 适配
+
+Fofax 提供了强大的第三方服务集成能力，您可以轻松接入各种主流网络空间测绘平台的 API，聚合多方数据源，在一个统一的平台下完成所有工作。
+
+- **多平台支持**: 无缝对接多个主流平台的 API。
+- **自定义配置**: 灵活的 API Key 管理和配置选项，让您能够根据需求随时切换和管理不同的数据源。
+- **统一查询语法**: 我们力求在不同平台间提供相似的查询体验，减少您的学习成本（具体请参考各平台适配说明）。
+
+### 🚀 无缝对接 FOFA API
+
+- **完整兼容**: Fofax 使用 FOFA 官方的 API 接口，保证了数据的准确性和权威性。您在官方网站上能搜到的，这里一样可以。
+- **轻松配置**: 只需在设置中填入您的 FOFA Email 和 API Key，即可立即开始使用，无需繁琐配置。
+
+### 🎨 精美流畅的现代化界面
+
+- **优雅设计**: 我们重新设计了每一个界面元素，为您提供一个清爽、直观、无干扰的查询环境。
+- **流畅体验**: 享受如原生应用般流畅的响应速度和交互动画，让数据浏览不再枯燥。
+- **数据可视化**: 以更现代的图表清晰地展示统计数据，帮助您快速洞察信息。
+
+### 🔒 您的隐私，您做主
+
+- **API 密钥本地存储**: 您的 FOFA Email 和 API Key 将被加密并**仅仅存储在您自己的设备上**，绝不会上传到任何服务器。
+- **无数据追踪**: 我们不会记录您的任何搜索历史或使用行为。您的所有操作都直接在您的电脑和 FOFA 服务器之间进行。
+
+### ⚠️ 免责声明
+
+Fofax 是一个由社区驱动的独立项目，与北京华顺信安科技有限公司（FOFA）没有任何官方关联。本项目不隶属于 FOFA，也未获得其官方认可或赞助。请确保您的使用行为符合 FOFA 的用户协议和相关法律法规。
+
+---
+
+感谢您选择 Fofax，希望它能为您带来愉快的网络资产测绘体验。

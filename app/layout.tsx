@@ -13,41 +13,41 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "FoFaX - Security Search Engine",
+  title: "Fofax - 美观隐私的 FOFA 第三方客户端",
   description:
-    "Advanced security search platform for network assets and vulnerabilities",
+    "Fofax 是一款现代化、注重隐私的 FOFA 第三方客户端。提供精美界面、本地数据存储、无追踪体验，让网络资产搜索更加优雅高效。",
   keywords:
-    "security, search engine, network assets, vulnerabilities, cybersecurity",
-  authors: [{ name: "FoFaX Team" }],
-  creator: "FoFaX",
-  publisher: "FoFaX",
+    "FOFA客户端, FOFA第三方, 网络安全工具, 资产搜索, 隐私保护, 现代界面, 网络空间测绘, cybersecurity, fofa client",
+  authors: [{ name: "Fofax Team" }],
+  creator: "Fofax",
+  publisher: "Fofax",
   openGraph: {
-    title: "FoFaX - Security Search Engine",
+    title: "Fofax - 美观隐私的 FOFA 第三方客户端",
     description:
-      "Advanced security search platform for network assets and vulnerabilities",
+      "现代化的 FOFA 第三方客户端，提供精美界面设计与隐私保护，让网络资产搜索体验更加优雅。API密钥本地存储，无数据追踪。",
     type: "website",
-    locale: "en_US",
-    siteName: "FoFaX",
+    locale: "zh_CN",
+    siteName: "Fofax",
     images: [
       {
         url: "https://fofax.mianfei.uk/welcome.png",
         width: 1200,
         height: 675,
-        alt: "FoFaX - Security Search Engine",
+        alt: "Fofax - 美观隐私的 FOFA 第三方客户端",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FoFaX - Security Search Engine",
+    title: "Fofax - 美观隐私的 FOFA 第三方客户端",
     description:
-      "Advanced security search platform for network assets and vulnerabilities",
+      "现代化的 FOFA 第三方客户端，提供精美界面设计与隐私保护，让网络资产搜索体验更加优雅。",
     images: [
       {
         url: "https://fofax.mianfei.uk/welcome.png",
         width: 1200,
         height: 675,
-        alt: "FoFaX - Security Search Engine",
+        alt: "Fofax - 美观隐私的 FOFA 第三方客户端",
       },
     ],
   },
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  generator: "FoFaX",
+  generator: "Fofax",
 };
 
 export default function RootLayout({

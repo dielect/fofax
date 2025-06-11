@@ -67,7 +67,7 @@ export default function HomePage() {
       );
     });
     
-    return <div className="flex flex-wrap gap-1">{elements}</div>;
+    return <div className="flex items-center gap-1 overflow-hidden">{elements}</div>;
   };
 
   const formattedContent = useMemo(() => {
@@ -104,9 +104,11 @@ export default function HomePage() {
               
               {!isFocused && formattedContent && (
                 <div 
-                  className="absolute inset-0 pl-5 pr-28 flex items-center text-lg pointer-events-none z-20 overflow-hidden"
+                  className="absolute inset-0 pl-5 pr-28 flex items-center text-lg pointer-events-none z-20 overflow-hidden whitespace-nowrap"
                 >
-                  {formattedContent}
+                  <div className="truncate w-full">
+                    {formattedContent}
+                  </div>
                 </div>
               )}
               

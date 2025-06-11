@@ -131,7 +131,7 @@ export default function FofaHeader({
       );
     });
     
-    return <div className="flex flex-wrap gap-1">{elements}</div>;
+    return <div className="flex items-center gap-1 overflow-hidden">{elements}</div>;
   };
 
   const formattedContent = useMemo(() => {
@@ -208,9 +208,11 @@ export default function FofaHeader({
                   
                   {!isFocused && formattedContent && (
                     <div 
-                      className="absolute inset-0 pl-4 pr-14 flex items-center text-sm pointer-events-none z-20 overflow-hidden"
+                      className={`absolute inset-0 pl-4 ${localQuery ? 'pr-20' : 'pr-14'} flex items-center text-sm pointer-events-none z-20 overflow-hidden whitespace-nowrap`}
                     >
-                      {formattedContent}
+                      <div className="truncate w-full">
+                        {formattedContent}
+                      </div>
                     </div>
                   )}
                 </motion.div>
@@ -336,9 +338,11 @@ export default function FofaHeader({
                   
                   {!mobileFocused && formattedContent && (
                     <div 
-                      className="absolute inset-0 pl-4 pr-14 flex items-center text-sm pointer-events-none z-20 overflow-hidden"
+                      className={`absolute inset-0 pl-4 ${localQuery ? 'pr-20' : 'pr-14'} flex items-center text-sm pointer-events-none z-20 overflow-hidden whitespace-nowrap`}
                     >
-                      {formattedContent}
+                      <div className="truncate w-full">
+                        {formattedContent}
+                      </div>
                     </div>
                   )}
                 </motion.div>

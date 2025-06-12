@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { SearchIcon, X, Settings, Menu, User, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { getAccountInfo, type AccountInfo } from "@/lib/api"
 import { useSearch } from "@/lib/context/search-context"
 import { useApiSettings } from "@/lib/context/api-settings-context"
@@ -34,6 +34,7 @@ export default function FofaHeader({
   const mobileInputRef = useRef<HTMLInputElement>(null)
   const userDropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const pathname = usePathname()
   
   // Use settings context
   const { apiUrl, apiKey, isLoaded } = useApiSettings()
@@ -43,12 +44,11 @@ export default function FofaHeader({
   
   // Initialize search query from props or context
   useEffect(() => {
-    if (initialSearchQuery && initialSearchQuery !== localQuery) {
+    // 优先使用URL参数中的查询词，因为它代表最新的用户意图
+    if (initialSearchQuery !== localQuery) {
       setLocalQuery(initialSearchQuery)
-    } else if (query && query !== localQuery) {
-      setLocalQuery(query)
     }
-  }, [initialSearchQuery, query])
+  }, [initialSearchQuery])
 
   // Close user dropdown when clicking outside
   useEffect(() => {
@@ -141,11 +141,11 @@ export default function FofaHeader({
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (localQuery.trim()) {
-      // Perform the search through context
-      await performSearch(localQuery)
-      // Navigate to search results page with the query parameter
-      router.push(`/search?q=${encodeURIComponent(localQuery.trim())}`)
-      // Close mobile menu if open
+      if (pathname === '/search') {
+        router.replace(`/search?q=${encodeURIComponent(localQuery.trim())}`)
+      } else {
+        router.push(`/search?q=${encodeURIComponent(localQuery.trim())}`)
+      }
       setShowMobileMenu(false)
     }
   }

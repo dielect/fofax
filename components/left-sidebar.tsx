@@ -104,7 +104,7 @@ export default function LeftSidebar() {
                   key={server}
                   className="flex justify-between items-center hover:bg-slate-700/30 px-2 py-1 rounded-md"
                 >
-                  <Link href="#" className="text-fofa-cyan hover:underline truncate text-xs md:text-sm">
+                  <Link href="#" className="text-fofa-gray-100 hover:text-fofa-cyan truncate text-xs md:text-sm">
                     {server}
                   </Link>
                   <span className="text-fofa-gray-400 bg-slate-700/50 px-1.5 py-0.5 rounded-md text-xs">{count}</span>

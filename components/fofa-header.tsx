@@ -94,11 +94,17 @@ export default function FofaHeader({
   }
 
   const formatInputContent = (value: string) => {
-    if (!value.includes("&&")) {
+    if (!value.trim()) {
       return null;
     }
     
-    const parts = value.split("&&");
+    // 检查是否包含 key=value 格式
+    const hasKeyValue = value.includes("=");
+    if (!hasKeyValue) {
+      return null;
+    }
+    
+    const parts = value.includes("&&") ? value.split("&&") : [value];
     const elements: ReactNode[] = [];
     
     parts.forEach((part, index) => {

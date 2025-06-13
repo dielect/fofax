@@ -6,8 +6,8 @@ import { Fragment, useMemo } from "react"
 import FofaLogo from "@/components/fofa-logo"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, HelpCircle, X } from "lucide-react"
-import { motion } from "framer-motion"
+import { Search, HelpCircle, X, Loader2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -15,13 +15,20 @@ import { useRouter } from "next/navigation"
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isFocused, setIsFocused] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+    if (searchQuery.trim() && !isLoading) {
+      setIsLoading(true)
+      try {
+        await router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+      } catch (error) {
+        console.error('Search navigation error:', error)
+        setIsLoading(false)
+      }
     }
   }
 
@@ -30,11 +37,17 @@ export default function HomePage() {
   }
 
   const formatInputContent = (value: string) => {
-    if (!value.includes("&&")) {
+    if (!value.trim()) {
       return null;
     }
     
-    const parts = value.split("&&");
+    // 检查是否包含 key=value 格式
+    const hasKeyValue = value.includes("=");
+    if (!hasKeyValue) {
+      return null;
+    }
+    
+    const parts = value.includes("&&") ? value.split("&&") : [value];
     const elements: ReactNode[] = [];
     
     parts.forEach((part, index) => {
@@ -80,6 +93,30 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-fofa-dark text-fofa-gray-100 overflow-hidden">
+      {/* 全屏加载遮罩 */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-fofa-dark/80 backdrop-blur-sm z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col items-center gap-4 p-8 rounded-lg bg-slate-800/50 border border-fofa-cyan/30"
+            >
+              <Loader2 className="w-8 h-8 text-fofa-cyan animate-spin" />
+              <div className="text-fofa-gray-100 text-lg font-medium">搜索中...</div>
+              <div className="text-fofa-gray-400 text-sm">正在为您准备搜索结果</div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main className="flex flex-1 flex-col items-center justify-center px-4 pt-20 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -99,7 +136,8 @@ export default function HomePage() {
                 onChange={handleInputChange}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className={`w-full h-14 pl-5 ${!isFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} pr-28 py-3 text-lg bg-slate-800/50 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-lg focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none`}
+                disabled={isLoading}
+                className={`w-full h-14 pl-5 ${!isFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} pr-28 py-3 text-lg bg-slate-800/50 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-lg focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none disabled:opacity-50 disabled:cursor-not-allowed`}
               />
               
               {!isFocused && formattedContent && (
@@ -112,7 +150,7 @@ export default function HomePage() {
                 </div>
               )}
               
-              {searchQuery && (
+              {searchQuery && !isLoading && (
                 <button
                   type="button"
                   onClick={clearSearch}
@@ -129,9 +167,14 @@ export default function HomePage() {
                 type="submit"
                 variant="ghost"
                 size="icon"
-                className="text-fofa-cyan hover:text-fofa-cyan-light transition-colors p-2 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none hover:bg-transparent"
+                disabled={isLoading}
+                className="text-fofa-cyan hover:text-fofa-cyan-light transition-colors p-2 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Search className="w-6 h-6" />
+                {isLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <Search className="w-6 h-6" />
+                )}
               </Button>
             </div>
           </form>

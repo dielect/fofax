@@ -4,9 +4,10 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Link2, Code, Box, RefreshCw, PlusCircle, Globe, Server, ExternalLink } from "lucide-react"
+import { Link2, Code, Box, RefreshCw, PlusCircle, Globe, Server, ExternalLink, Lock, Copy, Check } from "lucide-react"
 import { motion } from "framer-motion"
 import flags from 'emoji-flags'
+import React from "react"
 
 export interface ResultItemData {
   host?: string
@@ -28,14 +29,28 @@ export interface ResultItemData {
   os?: string[]
   jarm?: string
   header?: string
+  header_hash?: string
   cert?: {
     cert: string
+    domain?: string[]
+    issuer?: {
+      cn?: string
+      org?: string
+    }
+    not_after?: string
+    not_before?: string
+    sn?: string
+    subject?: {
+      cn?: string
+      org?: string
+    }
   }
   banner?: string
   updated_at?: string
   product?: Array<{
     product: string
     version?: string
+    category?: string
   }>
   version?: string
   icon_hash?: string
@@ -59,6 +74,37 @@ export default function ResultItem({ item }: ResultItemProps) {
   
   // Format URL for display - truncate if too long
   const displayUrl = url.length > 40 ? `${url.substring(0, 37)}...` : url;
+  
+  // State for copy success animation
+  const [isCopied, setIsCopied] = React.useState(false);
+  
+  // Function to copy IP to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+  
+  // Group products by category
+  const groupedProducts = React.useMemo(() => {
+    if (!item.product || item.product.length === 0) return {};
+    
+    return item.product.reduce((acc, prod) => {
+      const category = prod.category || '其他';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(prod);
+      return acc;
+    }, {} as Record<string, Array<{ product: string; version?: string; category?: string }>>);
+  }, [item.product]);
   
   return (
     <motion.div
@@ -88,46 +134,120 @@ export default function ResultItem({ item }: ResultItemProps) {
 
         <h3 className="text-md text-fofa-gray-100 truncate">{item.title || 'No title'}</h3>
         
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs md:text-sm text-fofa-gray-400">
-          <p>{item.ip}</p>
-          
-          {locationAvailable && (
-            <div className="flex items-center gap-2 text-fofa-gray-300">
-              {item.location?.country && (
-                <span className="text-base">
-                  {flags[item.location.country]?.emoji || item.location.country}
-                </span>
+        <div className="space-y-2">
+          {/* First row: IP with copy button */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-fofa-gray-400">
+              <span className="text-fofa-gray-200 font-mono">{item.ip}</span>
+              <motion.button
+                onClick={() => copyToClipboard(item.ip)}
+                className={`p-1 rounded transition-all duration-200 ${
+                  isCopied 
+                    ? 'bg-green-500/20 text-green-400' 
+                    : 'hover:bg-slate-700/50 text-fofa-gray-400 hover:text-fofa-cyan'
+                }`}
+                title={isCopied ? "Copied!" : "Copy IP"}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  scale: isCopied ? [1, 1.2, 1] : 1,
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.div
+                  animate={{ 
+                    scale: isCopied ? [1, 1.2, 1] : 1
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {isCopied ? (
+                    <Check size={12} />
+                  ) : (
+                    <Copy size={12} />
+                  )}
+                </motion.div>
+              </motion.button>
+              
+              {isCopied && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="text-xs text-green-400 font-medium"
+                >
+                  已复制
+                </motion.span>
               )}
-              <span className="truncate max-w-[180px]">
-                {[
-                  item.location?.country_name || item.location?.country, 
-                  item.location?.region, 
-                  item.location?.city
-                ]
-                  .filter(Boolean)
-                  .join(' / ')}
-              </span>
             </div>
-          )}
+            
+            {item.updated_at && (
+              <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
+                <span>日期：</span>
+                <span className="text-fofa-gray-200">{item.updated_at}</span>
+              </div>
+            )}
+          </div>
 
-          {item.asn && (
-            <div className="flex items-center gap-1">
-              <span className="text-fofa-gray-400">ASN:</span>
-              <span className="text-fofa-gray-200">{item.asn}</span>
-            </div>
-          )}
-          
+          {/* Second row: Location and ASN */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fofa-gray-400">
+            {locationAvailable && (
+              <div className="flex items-center gap-2 text-fofa-gray-300">
+                {item.location?.country && (
+                  <span className="text-base">
+                    {flags[item.location.country]?.emoji || item.location.country}
+                  </span>
+                )}
+                <span className="truncate max-w-[180px]">
+                  {[
+                    item.location?.country_name || item.location?.country, 
+                    item.location?.region, 
+                    item.location?.city
+                  ]
+                    .filter(Boolean)
+                    .join(' / ')}
+                </span>
+              </div>
+            )}
+
+            {item.asn && (
+              <div className="flex items-center gap-1">
+                <span className="text-fofa-gray-400">ASN:</span>
+                <span className="text-fofa-gray-200">{item.asn}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Third row: Organization */}
           {item.org && (
-            <div className="flex items-center gap-1 max-w-[200px] md:max-w-[300px]">
-              <span className="text-fofa-gray-400 whitespace-nowrap">组织：</span>
+            <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
+              <span className="whitespace-nowrap">组织：</span>
               <span className="text-fofa-gray-200 truncate">{item.org}</span>
             </div>
           )}
-          
-          {item.updated_at && (
-            <div className="flex items-center gap-1">
-              <span className="text-fofa-gray-400">日期：</span>
-              <span className="text-fofa-gray-200">{item.updated_at}</span>
+
+          {/* ICP row */}
+          {item.icp && (
+            <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
+              <span className="whitespace-nowrap">ICP备案：</span>
+              <span className="text-fofa-gray-200 truncate">{item.icp}</span>
+            </div>
+          )}
+
+          {/* Fourth row: Certificate (if available) */}
+          {item.cert && item.port === 443 && (
+            <div className="flex items-center gap-2 text-xs">
+              <Lock size={14} className="text-green-400 flex-shrink-0" />
+              <div className="flex items-center gap-1 text-fofa-gray-400">
+                <span>证书：</span>
+                <span className="text-fofa-gray-200 truncate max-w-[150px]">
+                  {item.cert.subject?.cn || item.cert.domain?.[0] || 'SSL Certificate'}
+                </span>
+                {item.cert.issuer?.org && (
+                  <span className="text-fofa-gray-400 text-xs">
+                    ({item.cert.issuer.org})
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -170,37 +290,62 @@ export default function ResultItem({ item }: ResultItemProps) {
       </div>
 
       <Tabs defaultValue="header" className="w-full text-sm">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 rounded-none">
+        <TabsList className={`grid w-full ${item.cert && item.port === 443 ? 'grid-cols-3' : 'grid-cols-2'} bg-slate-800/50 rounded-none`}>
           <TabsTrigger value="header" className="data-[state=active]:bg-slate-700 data-[state=active]:text-fofa-cyan">
             Header
           </TabsTrigger>
           <TabsTrigger value="products" className="data-[state=active]:bg-slate-700 data-[state=active]:text-fofa-cyan">
             Products
           </TabsTrigger>
+          {item.cert && item.port === 443 && (
+            <TabsTrigger value="certificate" className="data-[state=active]:bg-slate-700 data-[state=active]:text-fofa-cyan">
+              Certificate
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value="header" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300 leading-relaxed">
-          <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">{item.header || 'No header information available'}</pre>
+          <div className="relative">
+            {item.header_hash && (
+              <div className="absolute top-0 right-0">
+                <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80 bg-fofa-cyan/10">
+                  Hash: {item.header_hash.substring(0, 8)}...
+                </Badge>
+              </div>
+            )}
+            <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto pr-20">{item.header || 'No header information available'}</pre>
+          </div>
         </TabsContent>
         <TabsContent value="products" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300">
           {item.product && item.product.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {item.product.map((prod, index) => (
-                <div 
-                  key={index} 
-                  className="group inline-flex items-center gap-2 px-3 py-2 bg-slate-800/40 rounded-full border border-slate-700/30 hover:border-fofa-cyan/40 hover:bg-slate-800/60 transition-all duration-200 cursor-pointer"
-                >
-                  <div className="w-1.5 h-1.5 bg-fofa-cyan rounded-full flex-shrink-0 group-hover:bg-fofa-cyan/80 transition-colors"></div>
-                  <span className="text-sm font-medium text-fofa-gray-100 group-hover:text-fofa-cyan transition-colors whitespace-nowrap">
-                    {prod.product}
-                  </span>
-                  {prod.version && (
-                    <Badge 
-                      variant="outline" 
-                      className="text-xs border-fofa-cyan/40 text-fofa-cyan/80 bg-fofa-cyan/10 group-hover:border-fofa-cyan/60 transition-colors px-2 py-0.5 h-5"
-                    >
-                      {prod.version}
-                    </Badge>
-                  )}
+            <div className="space-y-4">
+              {Object.entries(groupedProducts).map(([category, products]) => (
+                <div key={category} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-semibold text-fofa-gray-100 uppercase tracking-wide">
+                      {category}
+                    </h4>
+                    <div className="flex-1 h-px bg-slate-700/50"></div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {products.map((prod, index) => (
+                      <div 
+                        key={`${category}-${index}`}
+                        className="group inline-flex items-center gap-2 px-3 py-2 bg-slate-800/40 rounded-full border border-slate-700/30 hover:border-fofa-cyan/40 hover:bg-slate-800/60 transition-all duration-200 cursor-pointer"
+                      >
+                        <span className="text-sm font-medium text-fofa-cyan group-hover:text-fofa-cyan/80 transition-colors whitespace-nowrap">
+                          {prod.product}
+                        </span>
+                        {prod.version && (
+                          <Badge 
+                            variant="outline" 
+                            className="text-xs border-fofa-cyan/40 text-fofa-cyan/80 bg-fofa-cyan/10 group-hover:border-fofa-cyan/60 transition-colors px-2 py-0.5 h-5"
+                          >
+                            {prod.version}
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -211,6 +356,82 @@ export default function ResultItem({ item }: ResultItemProps) {
             </div>
           )}
         </TabsContent>
+        {item.cert && item.port === 443 && (
+          <TabsContent value="certificate" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Lock size={16} className="text-green-400 flex-shrink-0" />
+                <h4 className="text-sm font-semibold text-fofa-cyan">SSL Certificate</h4>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {item.cert.subject?.cn && (
+                  <div>
+                    <span className="text-fofa-gray-400 block mb-1">Subject:</span>
+                    <span className="text-fofa-gray-100 font-mono text-sm">{item.cert.subject.cn}</span>
+                  </div>
+                )}
+                
+                {item.cert.issuer?.org && (
+                  <div>
+                    <span className="text-fofa-gray-400 block mb-1">Issuer:</span>
+                    <span className="text-fofa-gray-100 font-mono text-sm">{item.cert.issuer.org}</span>
+                    {item.cert.issuer.cn && (
+                      <span className="text-fofa-gray-300 font-mono text-xs block">({item.cert.issuer.cn})</span>
+                    )}
+                  </div>
+                )}
+                
+                {item.cert.not_before && (
+                  <div>
+                    <span className="text-fofa-gray-400 block mb-1">Valid From:</span>
+                    <span className="text-fofa-gray-100 font-mono text-sm">{item.cert.not_before}</span>
+                  </div>
+                )}
+                
+                {item.cert.not_after && (
+                  <div>
+                    <span className="text-fofa-gray-400 block mb-1">Valid Until:</span>
+                    <span className="text-fofa-gray-100 font-mono text-sm">{item.cert.not_after}</span>
+                  </div>
+                )}
+                
+                {item.cert.sn && (
+                  <div className="md:col-span-2">
+                    <span className="text-fofa-gray-400 block mb-1">Serial Number:</span>
+                    <span className="text-fofa-gray-100 font-mono text-sm break-all">{item.cert.sn}</span>
+                  </div>
+                )}
+                
+                {item.cert.domain && item.cert.domain.length > 0 && (
+                  <div className="md:col-span-2">
+                    <span className="text-fofa-gray-400 block mb-1">Domain Names:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {item.cert.domain.map((domain, index) => (
+                        <Badge 
+                          key={index}
+                          variant="outline" 
+                          className="text-xs border-fofa-cyan/40 text-fofa-cyan/80 bg-fofa-cyan/10"
+                        >
+                          {domain}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {item.cert.cert && (
+                <div className="mt-6">
+                  <span className="text-fofa-gray-400 block mb-2">Certificate Details:</span>
+                  <pre className="whitespace-pre-wrap break-all max-h-[300px] overflow-y-auto bg-slate-800/50 p-3 rounded text-xs">
+                    {item.cert.cert}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
 
       <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap gap-2">

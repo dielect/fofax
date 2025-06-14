@@ -210,7 +210,7 @@ export default function FofaHeader({
                     onChange={handleInputChange}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    className={`w-full h-11 pl-4 pr-14 ${!isFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
+                    className={`w-full h-11 pl-4 ${localQuery ? 'pr-20' : 'pr-14'} ${!isFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
                   />
                   
                   {!isFocused && formattedContent && (
@@ -356,7 +356,7 @@ export default function FofaHeader({
                     onChange={handleInputChange}
                     onFocus={() => setMobileFocused(true)}
                     onBlur={() => setMobileFocused(false)}
-                    className={`w-full h-11 pl-4 pr-14 ${!mobileFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
+                    className={`w-full h-11 pl-4 ${localQuery ? 'pr-20' : 'pr-14'} ${!mobileFocused && formattedContent ? 'text-transparent' : 'text-fofa-gray-100'} bg-slate-800/60 border-2 border-fofa-cyan/30 focus-visible:border-transparent focus-visible:ring-0 placeholder-fofa-gray-400 rounded-md text-sm focus-visible:ring-offset-0 focus-visible:outline-none z-10 relative [&::-webkit-search-cancel-button]:appearance-none transition-all duration-300`}
                   />
                   
                   {!mobileFocused && formattedContent && (

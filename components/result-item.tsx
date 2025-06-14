@@ -260,6 +260,14 @@ export default function ResultItem({ item }: ResultItemProps) {
             </div>
           )}
 
+          {/* JARM指纹 */}
+          {item.jarm && (
+            <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
+              <span className="whitespace-nowrap">JARM指纹：</span>
+              <span className="text-emerald-400 font-mono truncate max-w-[120px] md:max-w-none md:truncate-none break-all">{item.jarm}</span>
+            </div>
+          )}
+
           {/* TLS information */}
           {item.tls && (item.tls.version || item.tls.ja3s) && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fofa-gray-400">
@@ -325,12 +333,7 @@ export default function ResultItem({ item }: ResultItemProps) {
         </TabsList>
         <TabsContent value="header" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300 leading-relaxed">
           <div className="relative">
-            {item.header_hash && (
-              <div className="absolute top-0 right-0 text-xs text-fofa-cyan/80 font-mono bg-slate-900/80 px-2 py-1 rounded backdrop-blur-sm">
-                Hash: {item.header_hash}
-              </div>
-            )}
-            <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-scroll pr-20 scrollbar-hide">
+            <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-scroll scrollbar-hide">
               {item.header || 'No header information available'}
             </pre>
           </div>
@@ -457,11 +460,11 @@ export default function ResultItem({ item }: ResultItemProps) {
       <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap justify-between items-center gap-2">
         <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">
           {/* Display any additional tags */}
-          {item.jarm && (
+          {item.header_hash && (
             <div className="flex items-center gap-1 text-xs">
-              <span className="whitespace-nowrap text-emerald-400">JARM指纹：</span>
-              <span className="text-emerald-400 font-mono truncate max-w-[120px] md:max-w-[200px]" title={item.jarm}>
-                {item.jarm.length > 12 ? `${item.jarm.substring(0, 12)}...` : item.jarm}
+              <span className="whitespace-nowrap text-fofa-cyan/80">Header Hash：</span>
+              <span className="text-fofa-cyan/80 font-mono truncate max-w-[120px] md:max-w-[200px]" title={item.header_hash}>
+                {item.header_hash.length > 12 ? `${item.header_hash.substring(0, 12)}...` : item.header_hash}
               </span>
             </div>
           )}

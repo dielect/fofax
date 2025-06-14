@@ -89,7 +89,7 @@ export default function LeftSidebar() {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="w-full md:w-64 bg-fofa-dark/50 p-3 md:p-4 space-y-4 md:space-y-6 border-r border-slate-700/50 text-fofa-gray-200 text-sm"
+      className="hidden md:block w-64 bg-fofa-dark/50 p-4 space-y-6 border-r border-slate-700/50 text-fofa-gray-200 text-sm"
     >
       <div className="space-y-3 md:space-y-4">
         {/* Server distribution card */}

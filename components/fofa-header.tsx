@@ -181,7 +181,7 @@ export default function FofaHeader({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden text-fofa-cyan"
+                className="md:hidden text-fofa-cyan hover:text-fofa-cyan hover:bg-fofa-cyan/10 active:text-fofa-cyan active:bg-fofa-cyan/20 focus:text-fofa-cyan focus-visible:ring-0 focus-visible:ring-offset-0"
               >
                 <Menu size={24} />
               </Button>

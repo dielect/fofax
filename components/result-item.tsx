@@ -4,7 +4,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Link2, Code, Box, RefreshCw, PlusCircle, Globe, Server, ExternalLink, Lock, Copy, Check } from "lucide-react"
+import { Link2, Code, Box, RefreshCw, PlusCircle, Globe, Server, ExternalLink, Lock, Copy, Check, Fingerprint } from "lucide-react"
 import { motion } from "framer-motion"
 import flags from 'emoji-flags'
 import React from "react"
@@ -119,10 +119,10 @@ export default function ResultItem({ item }: ResultItemProps) {
       className="bg-slate-800/30 rounded-lg shadow-lg overflow-hidden border border-slate-700/50"
     >
       <div className="p-4 md:p-5 space-y-3">
-        <div className="flex justify-between items-start gap-2">
-          <div className="flex items-start gap-2 max-w-[calc(100%-60px)] overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+          <div className="flex items-start gap-2 min-w-0 flex-1">
             <Link2 size={18} className="text-fofa-cyan flex-shrink-0 mt-1" />
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <a
                 href={url}
                 target="_blank"
@@ -134,7 +134,7 @@ export default function ResultItem({ item }: ResultItemProps) {
               </a>
             </div>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0 self-start">
             {item.protocol && (
               <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs px-2 py-1">
                 {item.protocol.toUpperCase()}
@@ -455,12 +455,14 @@ export default function ResultItem({ item }: ResultItemProps) {
       </Tabs>
 
       <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap justify-between items-center gap-2">
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">
           {/* Display any additional tags */}
           {item.jarm && (
-            <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
-              <span>JARM指纹：</span>
-              <span className="text-fofa-gray-200 font-mono">{item.jarm}</span>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="whitespace-nowrap text-emerald-400">JARM指纹：</span>
+              <span className="text-emerald-400 font-mono truncate max-w-[120px] md:max-w-[200px]" title={item.jarm}>
+                {item.jarm.length > 12 ? `${item.jarm.substring(0, 12)}...` : item.jarm}
+              </span>
             </div>
           )}
           

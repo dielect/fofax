@@ -6,7 +6,7 @@ import FofaHeader from "@/components/fofa-header"
 import LeftSidebar from "@/components/left-sidebar"
 import ResultItem from "@/components/result-item"
 import {Button} from "@/components/ui/button"
-import { Loader2, Menu, X} from "lucide-react"
+import { Loader2, ChevronRight} from "lucide-react"
 import {motion} from "framer-motion"
 import {useSearch} from "@/lib/context/search-context"
 
@@ -102,29 +102,59 @@ function SearchResultsContent() {
             {/* pt for fixed header */}
             <FofaHeader initialSearchQuery={query}/>
             <div className="flex flex-1 overflow-hidden relative">
-                {/* Mobile sidebar toggle */}
-                <div className="md:hidden fixed z-30 bottom-4 left-4">
-                    <Button
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="w-12 h-12 rounded-full bg-fofa-cyan text-white shadow-lg flex items-center justify-center"
+                {/* Mobile sidebar toggle - Left edge indicator */}
+                <div className="md:hidden fixed z-30 left-0 top-1/2 -translate-y-1/2">
+                    <motion.div
+                        className="relative"
+                        initial={false}
+                        animate={{ x: sidebarOpen ? 0 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
-                        {sidebarOpen ? <X size={20}/> : <Menu size={20}/>}
-                    </Button>
+                        <Button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            variant="ghost"
+                            className={`
+                                h-16 w-6 rounded-r-lg border-0 bg-transparent text-white/40 
+                                flex items-center justify-center p-0 shadow-none
+                                hover:bg-transparent hover:text-white/80 hover:w-8 
+                                focus:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0
+                                transition-all duration-200
+                                ${sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                            `}
+                        >
+                            <ChevronRight size={16}/>
+                        </Button>
+
+                    </motion.div>
                 </div>
 
-                {/* Sidebar with mobile support */}
-                <div
-                    className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed md:relative z-20 md:translate-x-0 transition-transform duration-300 ease-in-out h-[calc(100vh-4rem)] overflow-auto`}>
+                {/* Sidebar with mobile support - Enhanced drawer animation */}
+                <motion.div
+                    className="fixed md:relative z-20 h-[calc(100vh-5rem)] mt-4 md:mt-0 overflow-auto md:translate-x-0 md:opacity-100 md:h-[calc(100vh-4rem)]"
+                    initial={false}
+                    animate={{ 
+                        x: sidebarOpen ? 0 : '-100%',
+                        opacity: sidebarOpen ? 1 : 0.9
+                    }}
+                    transition={{ 
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                        opacity: { duration: 0.2 }
+                    }}
+                >
                     <LeftSidebar/>
-                </div>
+                </motion.div>
 
-                {/* Overlay for mobile */}
-                {sidebarOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/50 z-10 md:hidden"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                )}
+                {/* Overlay for mobile with animation */}
+                <motion.div
+                    className="fixed inset-0 bg-black/50 z-10 md:hidden"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: sidebarOpen ? 1 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ pointerEvents: sidebarOpen ? 'auto' : 'none' }}
+                    onClick={() => setSidebarOpen(false)}
+                />
 
                 <main className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-900/20">
                     <motion.div

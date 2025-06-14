@@ -4,6 +4,7 @@ import { type ReactNode, type FormEvent, type ChangeEvent } from "react"
 import { Fragment, useMemo } from "react"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -258,15 +259,23 @@ export default function FofaHeader({
             </form>
           </div>
           
-          {/* Desktop user avatar */}
-          <div className="hidden md:flex items-center relative" ref={userDropdownRef}>
+          {/* User avatar - both desktop and mobile */}
+          <div className="flex items-center relative" ref={userDropdownRef}>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleUserClick}
               className="group p-2 transition-all duration-300"
             >
-              <User className="w-6 h-6 text-slate-400 group-hover:text-fofa-cyan transition-colors duration-300" />
+              <div className="w-10 h-10 group-hover:opacity-80 transition-opacity duration-300">
+                <Image
+                  src="/avatar.png"
+                  alt="User Avatar"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </motion.button>
             
             {/* User dropdown */}
@@ -277,7 +286,7 @@ export default function FofaHeader({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute top-full right-0 mt-2 w-72 bg-slate-800/95 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-xl z-50"
+                  className="absolute top-full right-0 mt-2 w-80 max-w-[90vw] bg-slate-800/95 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-xl z-50"
                 >
                   <div className="p-4">
                     {isLoadingAccount ? (
@@ -288,7 +297,15 @@ export default function FofaHeader({
                     ) : (
                       <div className="space-y-4">
                         <div className="flex items-center gap-3 pb-3 border-b border-slate-700/50">
-                          <User className="w-8 h-8 text-slate-300" />
+                          <div className="w-12 h-12">
+                            <Image
+                              src="/avatar.png"
+                              alt="User Avatar"
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                           <div>
                             <div className="flex items-center gap-1">
                               <p className="text-fofa-gray-100 font-medium">{accountInfo?.username || '用户'}</p>
@@ -386,66 +403,6 @@ export default function FofaHeader({
                 </div>
               </div>
             </form>
-            
-            {/* Mobile user info - Click to show */}
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              onClick={handleUserClick}
-              className="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-800/40 hover:bg-slate-800/60 transition-all duration-300 border border-slate-700/20 hover:border-slate-600/30"
-            >
-              <User className="w-7 h-7 text-slate-300" />
-              <div className="flex-1 text-left">
-                <p className="text-fofa-gray-100 font-medium">账户信息</p>
-                <p className="text-xs text-fofa-gray-400">点击查看详情</p>
-              </div>
-            </motion.button>
-            
-            {/* Mobile user dropdown */}
-            <AnimatePresence>
-              {showUserDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="mt-3 overflow-hidden"
-                >
-                  <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                    {isLoadingAccount ? (
-                      <div className="flex items-center justify-center py-4">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-fofa-cyan"></div>
-                        <span className="ml-2 text-fofa-gray-300">加载中...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="text-center pb-3 border-b border-slate-700/50">
-                          <div className="flex items-center justify-center gap-1">
-                            <p className="text-fofa-gray-100 font-medium">{accountInfo?.username || '用户'}</p>
-                            {accountInfo?.isvip && (
-                              <div className="w-4 h-4 bg-gradient-to-br from-fofa-cyan/80 to-blue-500/80 rounded-full flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5 text-white" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-xs text-fofa-gray-400">{accountInfo?.email || ''}</p>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-slate-700/30 p-3 rounded-lg text-center">
-                            <p className="text-xs text-fofa-gray-400 mb-1">剩余可使用量</p>
-                            <p className="text-lg text-fofa-cyan font-medium">{accountInfo?.remain_api_query || 0}</p>
-                          </div>
-                          <div className="bg-slate-700/30 p-3 rounded-lg text-center">
-                            <p className="text-xs text-fofa-gray-400 mb-1">有效期至</p>
-                            <p className="text-sm text-fofa-cyan font-medium">{accountInfo?.expiration || 'N/A'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         )}
       </motion.header>

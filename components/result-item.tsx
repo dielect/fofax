@@ -47,6 +47,11 @@ export interface ResultItemData {
   }
   banner?: string
   updated_at?: string
+  lastupdatetime?: string
+  tls?: {
+    ja3s?: string
+    version?: string
+  }
   product?: Array<{
     product: string
     version?: string
@@ -129,7 +134,14 @@ export default function ResultItem({ item }: ResultItemProps) {
               </a>
             </div>
           </div>
-          <Badge className="bg-blue-600 text-white text-xs flex-shrink-0">{item.port}</Badge>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {item.protocol && (
+              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs px-2 py-1">
+                {item.protocol.toUpperCase()}
+              </Badge>
+            )}
+            <Badge className="bg-blue-600 text-white text-xs">{item.port}</Badge>
+          </div>
         </div>
 
         <h3 className="text-md text-fofa-gray-100 truncate">{item.title || 'No title'}</h3>
@@ -180,12 +192,7 @@ export default function ResultItem({ item }: ResultItemProps) {
               )}
             </div>
             
-            {item.updated_at && (
-              <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
-                <span>日期：</span>
-                <span className="text-fofa-gray-200">{item.updated_at}</span>
-              </div>
-            )}
+
           </div>
 
           {/* Second row: Location and ASN */}
@@ -233,6 +240,8 @@ export default function ResultItem({ item }: ResultItemProps) {
             </div>
           )}
 
+
+
           {/* Fourth row: Certificate (if available) */}
           {item.cert && item.port === 443 && (
             <div className="flex items-center gap-2 text-xs">
@@ -248,6 +257,24 @@ export default function ResultItem({ item }: ResultItemProps) {
                   </span>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* TLS information */}
+          {item.tls && (item.tls.version || item.tls.ja3s) && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fofa-gray-400">
+              {item.tls.version && (
+                <div className="flex items-center gap-1">
+                  <span>TLS版本：</span>
+                  <span className="text-fofa-gray-200">{item.tls.version}</span>
+                </div>
+              )}
+              {item.tls.ja3s && (
+                <div className="flex items-center gap-1">
+                  <span>JA3S指纹：</span>
+                  <span className="text-fofa-gray-200 font-mono truncate max-w-[120px]">{item.tls.ja3s}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -270,14 +297,7 @@ export default function ResultItem({ item }: ResultItemProps) {
               <span className="tracking-widest truncate max-w-[120px] md:max-w-full">{item.os.join(", ")}</span>
             </Badge>
           )}
-          {item.protocol && (
-            <Badge
-              variant="secondary"
-              className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs px-2 md:px-3 py-1 tracking-wide"
-            >
-              <span className="tracking-widest">{item.protocol}</span>
-            </Badge>
-          )}
+
           {item.version && (
             <Badge
               variant="secondary"
@@ -306,13 +326,13 @@ export default function ResultItem({ item }: ResultItemProps) {
         <TabsContent value="header" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300 leading-relaxed">
           <div className="relative">
             {item.header_hash && (
-              <div className="absolute top-0 right-0">
-                <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80 bg-fofa-cyan/10">
-                  Hash: {item.header_hash.substring(0, 8)}...
-                </Badge>
+              <div className="absolute top-0 right-0 text-xs text-fofa-cyan/80 font-mono bg-slate-900/80 px-2 py-1 rounded backdrop-blur-sm">
+                Hash: {item.header_hash}
               </div>
             )}
-            <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto pr-20">{item.header || 'No header information available'}</pre>
+            <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-scroll pr-20 scrollbar-hide">
+              {item.header || 'No header information available'}
+            </pre>
           </div>
         </TabsContent>
         <TabsContent value="products" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300">
@@ -424,7 +444,7 @@ export default function ResultItem({ item }: ResultItemProps) {
               {item.cert.cert && (
                 <div className="mt-6">
                   <span className="text-fofa-gray-400 block mb-2">Certificate Details:</span>
-                  <pre className="whitespace-pre-wrap break-all max-h-[300px] overflow-y-auto bg-slate-800/50 p-3 rounded text-xs">
+                  <pre className="whitespace-pre-wrap break-all max-h-[300px] overflow-y-scroll bg-slate-800/50 p-3 rounded text-xs scrollbar-hide">
                     {item.cert.cert}
                   </pre>
                 </div>
@@ -434,22 +454,34 @@ export default function ResultItem({ item }: ResultItemProps) {
         )}
       </Tabs>
 
-      <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap gap-2">
-        {/* Display any additional tags */}
-        {item.jarm && (
-          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
-            JARM: {item.jarm.substring(0, 6)}...
-          </Badge>
-        )}
-        {item.icon_hash && (
-          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
-            Icon: {item.icon_hash.substring(0, 6)}...
-          </Badge>
-        )}
-        {item.fid && (
-          <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
-            FID: {item.fid.substring(0, 6)}...
-          </Badge>
+      <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap justify-between items-center gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {/* Display any additional tags */}
+          {item.jarm && (
+            <div className="flex items-center gap-1 text-xs text-fofa-gray-400">
+              <span>JARM指纹：</span>
+              <span className="text-fofa-gray-200 font-mono">{item.jarm}</span>
+            </div>
+          )}
+          
+          {item.icon_hash && (
+            <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
+              Icon: {item.icon_hash.substring(0, 6)}...
+            </Badge>
+          )}
+          {item.fid && (
+            <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
+              FID: {item.fid.substring(0, 6)}...
+            </Badge>
+          )}
+        </div>
+        
+        {/* Time information in bottom right */}
+        {(item.lastupdatetime || item.updated_at) && (
+          <div className="flex items-center gap-1 text-xs text-fofa-gray-400 ml-auto">
+            <span>更新时间：</span>
+            <span className="text-fofa-gray-300 font-mono">{item.lastupdatetime || item.updated_at}</span>
+          </div>
         )}
       </div>
     </motion.div>

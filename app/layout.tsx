@@ -17,22 +17,22 @@ export const metadata: Metadata = {
   description:
     "Fofax 是一款现代化、注重隐私的 FOFA 第三方客户端。提供精美界面、本地数据存储、无追踪体验，让网络资产搜索更加优雅高效。",
   keywords:
-    "FOFA客户端, FOFA第三方, 网络安全工具, 资产搜索, 隐私保护, 现代界面, 网络空间测绘, cybersecurity, fofa client",
+    "FOFA 客户端，FOFA 第三方，网络安全工具，资产搜索，隐私保护，现代界面，网络空间测绘，cybersecurity, fofa client",
   authors: [{ name: "Fofax Team" }],
   creator: "Fofax",
   publisher: "Fofax",
   openGraph: {
     title: "Fofax - 美观隐私的 FOFA 第三方客户端",
     description:
-      "现代化的 FOFA 第三方客户端，提供精美界面设计与隐私保护，让网络资产搜索体验更加优雅。API密钥本地存储，无数据追踪。",
+      "现代化的 FOFA 第三方客户端，提供精美界面设计与隐私保护，让网络资产搜索体验更加优雅。API 密钥本地存储，无数据追踪。",
     type: "website",
     locale: "zh_CN",
     siteName: "Fofax",
     images: [
       {
         url: "https://fofax.mianfei.uk/welcome.png",
-        width: 1200,
-        height: 675,
+        width: 1328,
+        height: 1328,
         alt: "Fofax - 美观隐私的 FOFA 第三方客户端",
       },
     ],
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "https://fofax.mianfei.uk/welcome.png",
-        width: 1200,
-        height: 675,
+        width: 1328,
+        height: 1328,
         alt: "Fofax - 美观隐私的 FOFA 第三方客户端",
       },
     ],

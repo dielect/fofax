@@ -216,7 +216,7 @@ export default function ResultItem({ item }: ResultItemProps) {
               </div>
             )}
 
-            {item.asn && (
+            {item.asn != null && (
               <div className="flex items-center gap-1">
                 <span className="text-fofa-gray-400">ASN:</span>
                 <span className="text-fofa-gray-200">{item.asn}</span>
@@ -332,7 +332,15 @@ export default function ResultItem({ item }: ResultItemProps) {
           )}
         </TabsList>
         <TabsContent value="header" className="p-3 md:p-4 bg-slate-900/30 text-xs text-fofa-gray-300 leading-relaxed">
-          <div className="relative">
+          <div className="relative space-y-3">
+            {item.header_hash && (
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/30">
+                <span className="text-fofa-gray-400">Header Hash：</span>
+                <span className="text-fofa-cyan font-mono break-all" title={item.header_hash}>
+                  {item.header_hash}
+                </span>
+              </div>
+            )}
             <pre className="whitespace-pre-wrap break-all max-h-[200px] overflow-y-scroll scrollbar-hide">
               {item.header || 'No header information available'}
             </pre>
@@ -460,15 +468,6 @@ export default function ResultItem({ item }: ResultItemProps) {
       <div className="p-2 md:p-3 bg-slate-800/30 border-t border-slate-700/50 flex flex-wrap justify-between items-center gap-2">
         <div className="flex flex-wrap gap-x-4 gap-y-2 items-center">
           {/* Display any additional tags */}
-          {item.header_hash && (
-            <div className="flex items-center gap-1 text-xs">
-              <span className="whitespace-nowrap text-fofa-cyan/80">Header Hash：</span>
-              <span className="text-fofa-cyan/80 font-mono truncate max-w-[120px] md:max-w-[200px]" title={item.header_hash}>
-                {item.header_hash.length > 12 ? `${item.header_hash.substring(0, 12)}...` : item.header_hash}
-              </span>
-            </div>
-          )}
-          
           {item.icon_hash && (
             <Badge variant="outline" className="text-xs border-fofa-cyan/50 text-fofa-cyan/80">
               Icon: {item.icon_hash.substring(0, 6)}...

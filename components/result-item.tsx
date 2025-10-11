@@ -70,8 +70,42 @@ interface ResultItemProps {
 }
 
 export default function ResultItem({ item }: ResultItemProps) {
+  const sanitizedProtocol = (() => {
+    const protocol = item.protocol?.toLowerCase();
+    if (!protocol) {
+      return item.port === 443 ? 'https' : 'http';
+    }
+
+    if (protocol === 'https' || protocol === 'http') {
+      return protocol;
+    }
+
+    if (/^[a-z][a-z0-9+\-.]*$/.test(protocol)) {
+      return protocol;
+    }
+
+    return item.port === 443 ? 'https' : 'http';
+  })();
+
   // Create a URL from host or IP+port
-  const url = item.host || `${item.protocol || 'http'}://${item.ip}:${item.port}`;
+  const url = React.useMemo(() => {
+    const fallback = `${sanitizedProtocol}://${item.ip}${item.port ? `:${item.port}` : ''}`;
+    const host = item.host?.trim();
+
+    if (!host) {
+      return fallback;
+    }
+
+    if (/^[a-z][a-z0-9+\-.]*:\/\//i.test(host)) {
+      return host;
+    }
+
+    if (host.startsWith('//')) {
+      return `${sanitizedProtocol}:${host}`;
+    }
+
+    return `${sanitizedProtocol}://${host}`;
+  }, [item.host, item.ip, item.port, sanitizedProtocol]);
   const locationAvailable = item.location && (item.location.country_name || item.location.country || item.location.region || item.location.city);
   
   // Generate a unique ID if not provided
